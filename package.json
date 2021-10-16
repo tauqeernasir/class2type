@@ -1,0 +1,15 @@
+{
+  "name": "class-to-ts-types",
+  "version": "0.0.1",
+  "description": "A simple class to plain TS types exporter",
+  "main": "dist/index.js",
+  "repository": "https://github.com/tauqeernaisr/class-to-ts-types",
+  "author": "Muhammad Tauqeer <tauqeer.insta@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "tsc": "tsc"
+  },
+  "devDependencies": {
+    "typescript": "^4.4.4"
+  }
+}
