@@ -26,6 +26,6 @@ Use following script to run the exporter
 
 ```json
 {
-  "script": "class2type --pattern '/src/**/*.dto.ts' --outDir './types' --outFile 'dist-types.ts' --namespace 'projectName'"
+  "script": "class2type --pattern /src/**/*.dto.ts --outDir ./types --outFile definitions.d.ts --namespace projectName"
 }
 ```
