@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 /**
  *
  * Example usage:
@@ -11,7 +12,7 @@
  */
 
 import * as cla from "command-line-args";
-import { existsSync, fstat, mkdirSync, writeFileSync } from "fs";
+import { existsSync, mkdirSync, writeFileSync } from "fs";
 import * as path from "path";
 import { format } from "prettier";
 import {
@@ -65,7 +66,9 @@ function readCliOptions(opts) {
 function run() {
   const cliOptions = readCliOptions(optionDefinitions);
 
-  const outputDirectory = path.resolve(process.cwd() + cliOptions.outDir);
+  const outputDirectory = path.resolve(
+    path.join(process.cwd(), cliOptions.outDir)
+  );
   project = new Project();
 
   if (!existsSync(outputDirectory)) {
@@ -84,11 +87,11 @@ function run() {
     const filename = file.getBaseName();
 
     let content = `
-         // ${filename}
-     `;
+           // ${filename}
+       `;
 
     file.getClasses().forEach((c) => {
-      const className = c.getName();
+      const className = c.getName() as string;
 
       const classComment = c
         .getJsDocs()
@@ -105,7 +108,7 @@ function run() {
 
         if (node.getKind() === SyntaxKind.CallExpression) {
           if (
-            node.getFirstChild().getText()?.toLowerCase() ===
+            node?.getFirstChild()?.getText()?.toLowerCase() ===
             "PartialType".toLowerCase()
           ) {
             /**
@@ -169,12 +172,14 @@ function run() {
 
     // temp file to contain all types to be used in SDK
     writeFile(
-      path.resolve(process.cwd() + "/sdk/types.temp"),
+      path.resolve(path.join(process.cwd(), cliOptions.outDir, "types.temp")),
       `${globalContent} ${innerContent}`
     );
 
     writeFile(
-      path.resolve(process.cwd() + "/sdk/definitions.d.ts"),
+      path.resolve(
+        path.join(process.cwd(), cliOptions.outDir, cliOptions.outFile)
+      ),
       format(finalContent, {
         semi: true,
         bracketSpacing: true,
@@ -215,15 +220,15 @@ function getTypePropertiesOrReturnAnyRecord(
 ) {
   if (properties.length) {
     return `${isExtending ? "& " : ""} {
-             ${properties.join(";\n")}
-         };`;
+               ${properties.join(";\n")}
+           };`;
   } else {
     return isExtending ? "" : `Record<string, any>`;
   }
 }
 
 function getRefType(p: PropertyDeclaration): "enum" | "typeAlias" | null {
-  if (p.compilerNode.type.kind === SyntaxKind.TypeReference) {
+  if (p?.compilerNode?.type?.kind === SyntaxKind.TypeReference) {
     if (p.getType().isEnum()) {
       return "enum";
     }
@@ -247,7 +252,7 @@ function getPropertiesInTextFormat(c: ClassDeclaration) {
     if (isEnumValue) {
       const foundEnum = searchForEnumInFiles(
         currentFile,
-        propertyValue.toString()
+        propertyValue?.toString()
       );
       if (foundEnum) {
         globalContent += foundEnum;
@@ -257,7 +262,7 @@ function getPropertiesInTextFormat(c: ClassDeclaration) {
     if (isTypeRefValue) {
       const foundTypeAlias = searchForTypeAliasInFiles(
         currentFile,
-        propertyValue.toString()
+        propertyValue?.toString()
       );
 
       if (foundTypeAlias) {
@@ -266,21 +271,21 @@ function getPropertiesInTextFormat(c: ClassDeclaration) {
     }
 
     return `
-             ${p
-               .getJsDocs()
-               .map((j) => j.getText())
-               .join("")}
-               ${propertyName}${isOptional ? "?" : ""}: ${propertyValue}
-               `;
+               ${p
+                 .getJsDocs()
+                 .map((j) => j.getText())
+                 .join("")}
+                 ${propertyName}${isOptional ? "?" : ""}: ${propertyValue}
+                 `;
   });
 }
 
 function getFinalContentTemplate(namespace: string, innerContent: string) {
   return `
-         namespace ${namespace} {
-             ${innerContent}
-         }
-     `;
+           namespace ${namespace} {
+               ${innerContent}
+           }
+       `;
 }
 
 type GetExtendedClassContentParams = {
@@ -294,9 +299,9 @@ function getExtendedClassContent(params: GetExtendedClassContentParams) {
   const resolvedArgs = extendArgs.map((arg) => getExtendedType(arg)).join("& ");
 
   return `
-     ${classComment}
-     export type ${className} = ${resolvedArgs}
-     ${getTypePropertiesOrReturnAnyRecord(properties, true)};`;
+       ${classComment}
+       export type ${className} = ${resolvedArgs}
+       ${getTypePropertiesOrReturnAnyRecord(properties, true)};`;
 }
 
 type GetNormalClassContentParams = {
@@ -308,8 +313,8 @@ type GetNormalClassContentParams = {
 function getNormalClassContent(params: GetNormalClassContentParams) {
   const { className, classComment, properties } = params;
   return `
-     ${classComment}
-     export type ${className} = ${getTypePropertiesOrReturnAnyRecord(
+       ${classComment}
+       export type ${className} = ${getTypePropertiesOrReturnAnyRecord(
     properties
   )};`;
 }
@@ -366,8 +371,8 @@ function searchForEnumInFiles(currentFile, enumValue) {
 
     foundEnum = findAndExtractEnumTextFromFile(specifiedFile, enumValue);
     return `
-     // ${specifier.split("/").pop()}
-     ${foundEnum.indexOf("export") !== 1 ? "export" : ""} ${foundEnum}\n\n`;
+       // ${specifier.split("/").pop()}
+       ${foundEnum?.indexOf("export") !== 1 ? "export" : ""} ${foundEnum}\n\n`;
   }
 
   return `${
@@ -407,8 +412,10 @@ function searchForTypeAliasInFiles(currentFile, aliasValue) {
 
     foundAlias = findAndExtractTypeTextFromFile(specifiedFile, aliasValue);
     return `
-       // ${specifier.split("/").pop()}
-       ${foundAlias.indexOf("export") !== 1 ? "export" : ""} ${foundAlias}\n\n`;
+         // ${specifier.split("/").pop()}
+         ${
+           foundAlias?.indexOf("export") !== 1 ? "export" : ""
+         } ${foundAlias}\n\n`;
   }
 
   return `${
@@ -420,7 +427,7 @@ try {
   run();
 } catch (e) {
   console.log("❌ \u001b[31m There was an error while generating types");
-  console.error("\u001b[33m" + e.message);
+  console.error("\u001b[33m" + (e as any).message);
   process.exit(1);
 }
 

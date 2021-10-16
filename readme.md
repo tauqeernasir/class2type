@@ -14,6 +14,6 @@ yarn add -D @tauqeernasir/class2type
 
 ```json
 {
-  "script": "class2type --pattern='*.dto.ts' --outDir='./types' --outFile='dist-types.ts' --namespace='projectName'"
+  "script": "class2type --pattern '*.dto.ts' --outDir './types' --outFile 'dist-types.ts' --namespace 'projectName'"
 }
 ```
