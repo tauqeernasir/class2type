@@ -170,12 +170,6 @@ function run() {
       `${globalContent} ${innerContent}`
     );
 
-    // temp file to contain all types to be used in SDK
-    writeFile(
-      path.resolve(path.join(process.cwd(), cliOptions.outDir, "types.temp")),
-      `${globalContent} ${innerContent}`
-    );
-
     writeFile(
       path.resolve(
         path.join(process.cwd(), cliOptions.outDir, cliOptions.outFile)
