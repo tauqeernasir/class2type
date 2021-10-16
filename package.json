@@ -1,5 +1,5 @@
 {
-  "name": "class-to-ts-types",
+  "name": "@tauqeernasir/class2type",
   "version": "0.0.1",
   "description": "A simple class to plain TS types exporter",
   "main": "dist/index.js",
