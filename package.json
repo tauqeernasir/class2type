@@ -1,6 +1,6 @@
 {
   "name": "@tauqeernasir/class2type",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A simple class to plain TS types exporter",
   "main": "dist/index.js",
   "bin": {
